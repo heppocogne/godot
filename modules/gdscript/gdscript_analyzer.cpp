@@ -927,7 +927,6 @@ void GDScriptAnalyzer::resolve_class_body(GDScriptParser::ClassNode *p_class) {
 						member.variable->setter->parameters[0]->set_datatype(member.get_datatype());
 					}
 
-					//resolve_function_body(member.variable->setter);
 					resolve_variable_setter(member.variable);
 				}
 			}
