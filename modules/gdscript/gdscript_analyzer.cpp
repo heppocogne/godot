@@ -499,12 +499,13 @@ GDScriptParser::DataType GDScriptAnalyzer::resolve_datatype(GDScriptParser::Type
 			return GDScriptParser::DataType();
 		}
 		result = ref->get_parser()->head->get_datatype();
-#ifdef DEBUG_ENABLED
+		//#ifdef DEBUG_ENABLED
+#if 1
 	} else if (ClassDB::has_enum(parser->current_class->base_type.native_type, first)) {
 #else
 	} else if (ClassDB::has_enum(parser->current_class->base_type.native_type, first) || ClassDB::classes.has(parser->current_class->base_type.native_type)) {
-#endif
-		// Native enum in current class.
+#endif // DEBUG_ENABLED
+	   // Native enum in current class.
 		result = make_native_enum_type(parser->current_class->base_type.native_type, first);
 	} else {
 		// Classes in current scope.
@@ -586,7 +587,6 @@ GDScriptParser::DataType GDScriptAnalyzer::resolve_datatype(GDScriptParser::Type
 			}
 		} else if (result.kind == GDScriptParser::DataType::NATIVE) {
 			// Only enums allowed for native.
-#ifdef DEBUG_ENABLED
 			if (ClassDB::has_enum(result.native_type, p_type->type_chain[1]->name)) {
 				if (p_type->type_chain.size() > 2) {
 					push_error(R"(Enums cannot contain nested types.)", p_type->type_chain[2]);
@@ -594,12 +594,12 @@ GDScriptParser::DataType GDScriptAnalyzer::resolve_datatype(GDScriptParser::Type
 					result = make_native_enum_type(result.native_type, p_type->type_chain[1]->name);
 				}
 			} else {
+#ifdef DEBUG_ENABLED
 				push_error(vformat(R"(Could not find nested enum type "%s" in class "%s".)", p_type->type_chain[1]->name, result.native_type), p_type->type_chain[1]);
-			}
 #else
-			result.kind = GDScriptParser::DataType::ENUM;
-			result.builtin_type = Variant::Type::INT;
+				result = make_native_enum_type(result.native_type, p_type->type_chain[1]->name);
 #endif
+			}
 		} else {
 			push_error(vformat(R"(Could not find nested type "%s" under base "%s".)", p_type->type_chain[1]->name, result.to_string()), p_type->type_chain[1]);
 			result.kind = GDScriptParser::DataType::VARIANT; // Leave Variant anyway so future type check don't use an unresolved type.
