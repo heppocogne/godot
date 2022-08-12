@@ -4698,6 +4698,20 @@ bool GDScriptAnalyzer::get_function_signature(GDScriptParser::Node *p_source, bo
 				if (!r_method_flags.has_flag(METHOD_FLAG_STATIC) && was_enum && !(E.flags & METHOD_FLAG_CONST)) {
 					push_error(vformat(R"*(Cannot call non-const Dictionary function "%s()" on enum "%s".)*", p_function, p_base_type.enum_type), p_source);
 				}
+
+				//overwrite return type/parameter types if p_base_type is typed array
+				if (p_base_type.builtin_type == Variant::Type::ARRAY && p_base_type.has_container_element_type()) {
+					if (r_return_type.builtin_type == Variant::Type::NIL && (E.return_val.usage & PROPERTY_USAGE_NIL_IS_VARIANT)) {
+						r_return_type = p_base_type.get_container_element_type();
+					}
+					for (auto &param_type : r_par_types) {
+						if (param_type.builtin_type == Variant::Type::NIL) {
+							param_type = p_base_type.get_container_element_type();
+						}
+					}
+				}
+
+				r_static = Variant::is_builtin_method_static(p_base_type.builtin_type, function_name);
 				return true;
 			}
 		}
