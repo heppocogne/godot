@@ -163,6 +163,8 @@ Error ResourceLoaderText::_parse_ext_resource(VariantParser::Stream *p_stream, R
 						err = error;
 					} else {
 						ResourceLoader::notify_dependency_error(local_path, path, type);
+						r_err_str = "Can't load resource because of dependency error: " + path;
+						err = ERR_CANT_ACQUIRE_RESOURCE;
 					}
 				}
 			} else {
